@@ -1,7 +1,9 @@
 # fview-rwdsimplemenu: Simple responsive menu
 A plugin for [famous-views](http://famous-views.meteor.com).
 
-This plugin brings a responsive one level deep menu
+This plugin brings a responsive one level deep menu.
+
+![fview-rwdsimplemenu](https://raw.githubusercontent.com/PEM--/fview-rwdsimplemenu/master/assets/fview-rwdsimplemenu.gif)
 
 **demo**: [Market analysis](http://marketanalysis.meteor.com/).
 
@@ -24,6 +26,31 @@ with [Maxime Quandalle's Jade](https://github.com/mquandalle/meteor-jade).
 meteor add mquandalle:jade
 ```
 
+Add the menu to your main layout:
+```jade
+head
+  title My super app
+  meta(charset='utf-8')
+  meta(name='viewport', content='width=device-width, maximum-scale=1, initial-scale=1, user-scalable=no')
+  meta(name='apple-mobile-web-app-capable', content='yes')
+  meta(name='apple-mobile-web-app-status-bar-style', content='black')
+  meta(name='apple-mobile-web-app-capable', content='yes')
+  meta(name='mobile-web-app-capable', content='yes')
+body
+
+template(name='layout')
+  +famousContext id='mainCtx'
+    // This add the sidemenu for mobile or xsmall screen
+    +sideMenu
+    +StateModifier align='[.5,.5]' origin='[.5,.5]' size=main
+      +HeaderFooterLayout headerSize='50' footerSize='0'
+        +StateModifier align='[.5,.5]' origin='[.5,.5]' target='header' translate='[0, 0, 100]'
+            // This add the sidemenu for tablet or desktop
+            +menu
+        +RenderController target='content'
+          +yield
+```
+
 Put your own logo
 ```jade
 template(name='menuLogo')
@@ -39,4 +66,4 @@ mainMenu.addRoute 'profile', 'fa-user', ' Profile'
 mainMenu.addRoute 'company', 'fa-building', ' Company'
 ```
 
-TODO: Carry on docs
+TODO: Carry on docs (styling, API, ...)
