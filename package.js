@@ -33,9 +33,3 @@ Package.onUse(function(api) {
     'fview-rwdsimplemenu.jade'
   ], 'client');
 });
-
-Package.onTest(function(api) {
-  api.use('tinytest');
-  api.use('fview-rwdsimplemenu');
-  api.addFiles('fview-rwdsimplemenu-tests.js');
-});
