@@ -13,9 +13,9 @@ class @RwdSimpleMenu
     sideMenuSelColor: CSSC.white
     transition: curve: 'easeInOut', duration: 300
   constructor: (options) ->
-    @options = Utility.clone @constructor.DEFAULT_OPTIONS or \
+    @options = famous.utilities.Utility.clone @constructor.DEFAULT_OPTIONS or \
       MainMenu.DEFAULT_OPTIONS
-    @_optionsManager = new OptionsManager @options
+    @_optionsManager = new famous.core.OptionsManager @options
     @setOptions options
     @isSideMenuActive = false
     @isSideMenuActiveDeps = new Tracker.Dependency
@@ -94,7 +94,7 @@ class @RwdSimpleMenu
     Tracker.autorun =>
       @isSideMenuActiveDeps.depend()
       posx = if @isSideMenuActive then 0 else -@options.sideMenuWidth
-      @fview?.modifier.setTransform (Transform.translate posx, \
+      @fview?.modifier.setTransform (famous.core.Transform.translate posx, \
         0, @options.sideMenuZindex), @options.transition
   activate: ->
     if @isSideMenuActive is false
@@ -123,6 +123,6 @@ class @RwdSimpleMenu
         @menuUnderline.setOpacity 1, @options.transition
         posX = (@items.length-found-1)*@options.labelWidth + \
           (@items.length-found-1)*@options.labelSpacing
-        @menuUnderline.setTransform (Transform.translate -posX,0,0), \
-          @options.transition
+        @menuUnderline.setTransform (famous.core.Transform.translate -posX,\
+          0, 0), @options.transition
   setOptions: (options) -> @_optionsManager.patch options
