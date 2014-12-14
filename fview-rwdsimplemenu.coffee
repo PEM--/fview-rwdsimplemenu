@@ -4,24 +4,19 @@ Template.RwdSimpleMenuMainMenu.created = ->
 PrivateMenu = null
 
 FView.ready ->
-  class PrivateMenuTop extends famous.core.View
-    @DEFAULT_OPTIONS: {}
-    constructor: (@options) ->
-      super @options
-
-  class PrivateSideMenu extends famous.core.View
-    @DEFAULT_OPTIONS: {}
-    constructor: (@options) ->
-      super @options
-
-  # Private class defining the menu
-  class PrivateMenu extends famous.core.View
+  class PrivateMainMenu extends famous.core.View
     @DEFAULT_OPTIONS:
       labelWidth: 100
       labelSpacing: 20
-      menuHeight: 50
       underlineBorderRadius: 4
       underlineBgColor: CSSC.darkgray
+    constructor: (@options) ->
+      super @options
+      @placeHolder = PrivateMenu._getAndCheckPlaceholder 'RwdSimpleMenuMainMenu'
+
+
+  class PrivateSideMenu extends famous.core.View
+    @DEFAULT_OPTIONS:
       sideMenuZindex: 150
       sideMenuWidth: 200
       sideMenuBgColor: CSSC.darkgray
@@ -31,13 +26,21 @@ FView.ready ->
       transition: curve: 'easeInOut', duration: 300
     constructor: (@options) ->
       super @options
-      console.log "RwdSimpleMenu [#{@options.menuHeight},\
-        #{@options.menuHeight}]"
+      @placeHolder = PrivateMenu._getAndCheckPlaceholder 'RwdSimpleMenuSideMenu'
+
+  # Private class defining the menu
+  class PrivateMenu extends famous.core.View
+    @DEFAULT_OPTIONS:
+      menuHeight: 50
+      transition: curve: 'easeInOut', duration: 300
+    constructor: (@options) ->
+      super @options
+      console.log @options
+
       @isSideMenuActive = false
       @isSideMenuActiveDeps = new Tracker.Dependency
-      fview = FView.byId 'RwdSimpleMenuMainMenu'
-      @mainMenuPlaceHolder = @_getAndCheckPlaceholders 'RwdSimpleMenuMainMenu'
-      @sideMenuPlaceHolder = @_getAndCheckPlaceholders 'RwdSimpleMenuSideMenu'
+      @mainMenu = new PrivateMainMenu
+      @sideMenu = new PrivateSideMenu
       Template.RwdSimpleMenuMainMenu.rendered = =>
         #@fview = FView.byId 'sideMenu'
         RwdSimpleMenuMainHomeButton = FView.byId 'RwdSimpleMenuMainHomeButton'
@@ -111,7 +114,8 @@ FView.ready ->
           mainMenu.deactivate()
       @depend()
       ###
-    _getAndCheckPlaceholders: (placeHolderName) ->
+    # Static functions used by aggreagated classes
+    @_getAndCheckPlaceholder: (placeHolderName) ->
       fview = FView.byId placeHolderName
       if fview is undefined
         FView.log.error "Please create a placeholder #{placeHolderName}"
