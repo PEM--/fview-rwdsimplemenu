@@ -1,4 +1,5 @@
-class @RwdSimpleMenu
+# Private class defining the menu
+class _Menu
   @DEFAULT_OPTIONS:
     labelWidth: 100
     labelSpacing: 20
@@ -90,6 +91,10 @@ class @RwdSimpleMenu
     @depend()
   addRoute: (route, icon, label) ->
     @items.push {rt: route, ic: icon, lbl: label}
+  removeRoute: (route) ->
+    found = _.indexOf @items, (_.find @items, (item) -> item.rt is route)
+    unless found is -1
+      @items.splice found, 1
   depend: =>
     Tracker.autorun =>
       @isSideMenuActiveDeps.depend()
@@ -126,3 +131,12 @@ class @RwdSimpleMenu
         @menuUnderline.setTransform (famous.core.Transform.translate -posX,\
           0, 0), @options.transition
   setOptions: (options) -> @_optionsManager.patch options
+
+# Exposed class as a Singleton
+class @RwdSimpleMenu
+  instance = null
+  @get: (options) ->
+    if instance  is null
+      instance = new _Menu options
+    else
+      instance.setOptions options

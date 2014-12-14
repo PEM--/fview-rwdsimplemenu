@@ -1,7 +1,7 @@
 Package.describe({
   name: 'pierreeric:fview-rwdsimplemenu',
   summary: 'Simple responsive menu plugin for famous-views',
-  version: '0.1.0',
+  version: '0.2.0',
   git: 'https://github.com/PEM--/fview-rwdsimplemenu.git'
 });
 
