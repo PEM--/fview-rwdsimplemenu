@@ -1,9 +1,14 @@
-template(name='menu')
-  +Surface id='menuHome' class='menubutton' align='[0,.5]' origin='[0,.5]' size=buttonSize
-    +menuLogo
-  if rwindow.screen 'lte' 'xsmall'
+template(name='RwdSimpleMenuMainMenu')
+  +Surface(
+    id='RwdSimpleMenuMainHomeButton'
+    class='rwd-simple-menu-main-home-button'
+    align='[0,.5]' origin='[0,.5]'
+    size=buttonSize
+  )
+    +RwdSimpleMenuMainMenuLogo
+  //if rwindow.screen 'lte' 'xsmall'
     +menuHamburger
-  else
+  //else
     +menuTop
 
 template(name='menuHamburger') 

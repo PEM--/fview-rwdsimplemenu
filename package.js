@@ -29,7 +29,7 @@ Package.onUse(function(api) {
     'pierreeric:cssc-colors@1.0.3'
   ], 'client');
   api.addFiles([
-    'fview-rwdsimplemenu.coffee',
-    'fview-rwdsimplemenu.jade'
+    'fview-rwdsimplemenu.jade',
+    'fview-rwdsimplemenu.coffee'
   ], 'client');
 });
