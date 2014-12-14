@@ -4,15 +4,15 @@ Template.RwdSimpleMenuMainMenu.created = ->
 PrivateMenu = null
 
 FView.ready ->
-  class PrivateSideMenu extends famous.core.View
-    @DEFAULT_OPTIONS: {}
-    constructor: (options) ->
-      super options
-
   class PrivateMenuTop extends famous.core.View
     @DEFAULT_OPTIONS: {}
-    constructor: (options) ->
-      super options
+    constructor: (@options) ->
+      super @options
+
+  class PrivateSideMenu extends famous.core.View
+    @DEFAULT_OPTIONS: {}
+    constructor: (@options) ->
+      super @options
 
   # Private class defining the menu
   class PrivateMenu extends famous.core.View
@@ -29,12 +29,15 @@ FView.ready ->
       sideMenuSelBgColor: CSSC.gray
       sideMenuSelColor: CSSC.white
       transition: curve: 'easeInOut', duration: 300
-    constructor: (options) ->
-      super options
+    constructor: (@options) ->
+      super @options
       console.log "RwdSimpleMenu [#{@options.menuHeight},\
         #{@options.menuHeight}]"
       @isSideMenuActive = false
       @isSideMenuActiveDeps = new Tracker.Dependency
+      fview = FView.byId 'RwdSimpleMenuMainMenu'
+      @mainMenuPlaceHolder = @_getAndCheckPlaceholders 'RwdSimpleMenuMainMenu'
+      @sideMenuPlaceHolder = @_getAndCheckPlaceholders 'RwdSimpleMenuSideMenu'
       Template.RwdSimpleMenuMainMenu.rendered = =>
         #@fview = FView.byId 'sideMenu'
         RwdSimpleMenuMainHomeButton = FView.byId 'RwdSimpleMenuMainHomeButton'
@@ -108,6 +111,16 @@ FView.ready ->
           mainMenu.deactivate()
       @depend()
       ###
+    _getAndCheckPlaceholders: (placeHolderName) ->
+      fview = FView.byId placeHolderName
+      if fview is undefined
+        FView.log.error "Please create a placeholder #{placeHolderName}"
+        throw new Error "No placeholder for #{placeHolderName}"
+      placeHolder = fview.modifier
+      if placeHolder is undefined
+        FView.log.error "Placeholder #{placeHolderName} isn't a StateModifier"
+        throw new Error "#{placeHolderName} isn't a StateModifier"
+      placeHolder
     addRoute: (route, icon, label) ->
       @items.push {rt: route, ic: icon, lbl: label}
     removeRoute: (route) ->
