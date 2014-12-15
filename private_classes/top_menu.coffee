@@ -1,5 +1,6 @@
 FView.ready ->
   MainMenu = RwdSimpleMenu._class.MainMenu
+  Hamburger = RwdSimpleMenu._class.Hamburger
   class RwdSimpleMenu._class.TopMenu extends famous.core.View
     @DEFAULT_OPTIONS:
       minWidth: 'xsmall'
@@ -13,7 +14,7 @@ FView.ready ->
     constructor: (@options) ->
       super @options
       # Get and check if main menu placeholder is available
-      @placeHolder = MainMenu._getAndCheckPlaceholder 'RwdSimpleMenuMainMenu'
+      @placeHolder = MainMenu._getPlaceholder 'RwdSimpleMenuMainMenu'
       @placeHolder.node.add @
       @css = new CSSC
       @menuNode = @_createMainMod()
@@ -33,15 +34,10 @@ FView.ready ->
         origin: [0,.5]
         size: [@options.logoWidth, @options.logoHeight]
         opacity: 0
-      tpl = Template['RwdSimpleMenuLogo']
-      if tpl is undefined
-        FView.log.error 'Please set logo as template RwdSimpleMenuLogo'
-        throw new Error 'No logo RwdSimpleMenuLogo'
-      html = Blaze.toHTML Template['RwdSimpleMenuLogo']
       homeButtonSurf = new famous.core.Surface
         classes: ['rwd-simple-menu-logo']
         size: [@options.logoWidth, @options.logoHeight]
-        content: html
+        content: MainMenu._getHtmlFromTemplate 'RwdSimpleMenuLogo'
       (@menuNode.add homeButtonMod).add homeButtonSurf
       homeButtonSurf.on 'click', -> Router.go '/'
       homeButtonMod.setOpacity 1, @options.transition
@@ -55,12 +51,12 @@ FView.ready ->
       seqView = new famous.views.SequentialLayout
         itemSpacing: @options.labelSpacing
       (@menuNode.add seqMod).add seqView
-
-      @hamburgerSeq = []
+      @hamburgerSeq = [new Hamburger @options]
       @menuSeq = []
       Tracker.autorun =>
         isSmall = rwindow.screen 'lte', @options.minWidth
-        currSeq = if isSmall then @hamburgerSeq else @menuSeq
+        #currSeq = if isSmall then @hamburgerSeq else @menuSeq
+        currSeq = @hamburgerSeq
         seqMod.setOpacity 0, @options.transition, =>
           seqView.sequenceFrom currSeq
           seqMod.setOpacity 1, @options.transition

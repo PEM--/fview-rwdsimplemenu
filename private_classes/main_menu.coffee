@@ -10,6 +10,7 @@ FView.ready ->
       # Merge default options from aggregate classes and transmitted options
       @_optionsManager.patch RwdSimpleMenu._class.TopMenu.DEFAULT_OPTIONS
       @_optionsManager.patch RwdSimpleMenu._class.SideMenu.DEFAULT_OPTIONS
+      @_optionsManager.patch RwdSimpleMenu._class.Hamburger.DEFAULT_OPTIONS
       @_optionsManager.patch options
       # Instantiate aggregated classes with the merged options
       @mainMenu = new RwdSimpleMenu._class.TopMenu @options
@@ -93,7 +94,7 @@ FView.ready ->
       @depend()
       ###
     # Static functions used by aggreagated classes
-    @_getAndCheckPlaceholder: (placeHolderName) ->
+    @_getPlaceholder: (placeHolderName) ->
       fview = FView.byId placeHolderName
       if fview is undefined
         FView.log.error "Please create a placeholder #{placeHolderName}"
@@ -103,6 +104,12 @@ FView.ready ->
         FView.log.error "Placeholder #{placeHolderName} isn't a StateModifier"
         throw new Error "#{placeHolderName} isn't a StateModifier"
       fview
+    @_getHtmlFromTemplate: (tplName) ->
+      tpl = Template[tplName]
+      if tpl is undefined
+        FView.log.error "Please set template #{tplName}"
+        throw new Error "No #{tplName} defined"
+      Blaze.toHTML tpl
     addRoute: (route, icon, label) ->
       @items.push {rt: route, ic: icon, lbl: label}
     removeRoute: (route) ->

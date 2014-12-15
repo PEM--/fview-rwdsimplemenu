@@ -11,4 +11,4 @@ FView.ready ->
       transition: curve: 'easeInOut', duration: 300
     constructor: (@options) ->
       super @options
-      @placeHolder = MainMenu._getAndCheckPlaceholder 'RwdSimpleMenuSideMenu'
+      @placeHolder = MainMenu._getPlaceholder 'RwdSimpleMenuSideMenu'
