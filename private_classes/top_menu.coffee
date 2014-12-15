@@ -1,6 +1,10 @@
 FView.ready ->
   MainMenu = RwdSimpleMenu._class.MainMenu
   Hamburger = RwdSimpleMenu._class.Hamburger
+  SpringTransition = famous.transitions.SpringTransition
+  Transitionable = famous.transitions.Transitionable
+  Transitionable.registerMethod 'spring', SpringTransition
+
   class RwdSimpleMenu._class.TopMenu extends famous.core.View
     @DEFAULT_OPTIONS:
       minWidth: 'xsmall'
@@ -38,11 +42,19 @@ FView.ready ->
         origin: [0,0]
         size: [@options.logoWidth, @options.logoHeight]
         opacity: 0
+      animMod = new famous.modifiers.StateModifier
+        align: [.5,.5]
+        origin: [.5,.5]
+        size: [@options.logoWidth, @options.logoHeight]
       homeButtonSurf = new famous.core.Surface
         classes: ['rwd-simple-menu-logo']
         content: MainMenu._getHtmlFromTemplate 'RwdSimpleMenuLogo'
-      (@menuNode.add homeButtonMod).add homeButtonSurf
-      homeButtonSurf.on 'click', -> Router.go '/'
+      ((@menuNode.add homeButtonMod).add animMod).add homeButtonSurf
+      homeButtonSurf.on 'click', ->
+        homeButtonMod.halt()
+        homeButtonMod.setTransform (famous.core.Transform.translate 0,0),
+          method:"spring", period: 300, dampingRatio: .5, velocity: 0.05
+        Router.go '/'
       homeButtonMod.setOpacity 1, @options.transition
       @css.add '.rwd-simple-menu-logo', cursor: 'pointer'
     _createMenuItems: ->
