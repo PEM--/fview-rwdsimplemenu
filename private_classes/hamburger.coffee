@@ -4,32 +4,30 @@ FView.ready ->
       hamburgerSize: 50
     constructor: (@options) ->
       super @options
-      mod = new famous.modifiers.StateModifier
-        align: [.5,.5]
-        origin: [.5,.5]
-        size: [@options.hamburgerSize, @options.hamburgerSize]
-      node = @add mod
-      @modOn = @_createModSurf node, 'On'
-      @modOff = @_createModSurf node, 'Off'
+      @modOn = @_createModSurf 'On'
+      @modOff = @_createModSurf 'Off'
       @status = false
       @modOn.setOpacity Number @status
       @modOff.setOpacity Number not @status
-      window.hamburger = @
-    _createModSurf: (node, name) ->
+      @css = new CSSC
+      @_eventInput.on 'click', =>
+        @toggle()
+        @_eventOutput.emit 'toggled'
+    _createModSurf: (name) ->
       mod = new famous.modifiers.StateModifier
-        align: [.5,.5]
-        origin: [.5,.5]
         size: [@options.hamburgerSize, @options.hamburgerSize]
       surf = new famous.core.Surface
         classes: [
           'rwd-simple-menu-hamburger'
           name.toLowerCase()
         ]
-        size: [@options.hamburgerSize, @options.hamburgerSize]
         content: RwdSimpleMenu._class.MainMenu._getHtmlFromTemplate \
           "RwdSimpleMenuHamburger#{name}"
-      (node.add mod).add surf
+      css.add '.rwd-simple-menu-hamburger', cursor: 'pointer'
+      surf.pipe @
+      (@add mod).add surf
       mod
+    getSize: -> @modOn.getSize()
     toggle: ->
       @status = not @status
       @modOn.setOpacity (Number @status), @options.transition

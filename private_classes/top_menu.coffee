@@ -21,22 +21,25 @@ FView.ready ->
       @_createHomeButton()
       @_createMenuItems()
     _createMainMod: ->
-      mainMod = new famous.modifiers.StateModifier
-        align: [.5,.5]
-        origin: [.5,.5]
+      @mainMod = new famous.modifiers.StateModifier
+        align: [.5,0]
+        origin: [.5,0]
+        size: [
+          (Math.min rwindow.innerWidth()
+          @options.maxWidth), @options.menuHeight
+        ]
       Tracker.autorun =>
         curWidth = Math.min rwindow.innerWidth(), @options.maxWidth
-        mainMod.setSize [curWidth, @options.menuHeight]
-      @add mainMod
+        @mainMod.setSize [curWidth, @options.menuHeight]
+      @add @mainMod
     _createHomeButton: ->
       homeButtonMod = new famous.modifiers.StateModifier
-        align: [0,.5]
-        origin: [0,.5]
+        align: [0,0]
+        origin: [0,0]
         size: [@options.logoWidth, @options.logoHeight]
         opacity: 0
       homeButtonSurf = new famous.core.Surface
         classes: ['rwd-simple-menu-logo']
-        size: [@options.logoWidth, @options.logoHeight]
         content: MainMenu._getHtmlFromTemplate 'RwdSimpleMenuLogo'
       (@menuNode.add homeButtonMod).add homeButtonSurf
       homeButtonSurf.on 'click', -> Router.go '/'
@@ -44,12 +47,12 @@ FView.ready ->
       @css.add '.rwd-simple-menu-logo', cursor: 'pointer'
     _createMenuItems: ->
       seqMod = new famous.modifiers.StateModifier
-        align: [1,.5]
-        origin: [1,.5]
-        size: [true, @options.logoHeight]
+        align: [1,0]
+        origin: [1,0]
         opacity: 1
       seqView = new famous.views.SequentialLayout
         itemSpacing: @options.labelSpacing
+        direction: famous.utilities.Utility.Direction.X
       (@menuNode.add seqMod).add seqView
       @hamburgerSeq = [new Hamburger @options]
       @menuSeq = []
