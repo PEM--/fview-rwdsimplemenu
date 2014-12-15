@@ -30,6 +30,10 @@ Package.onUse(function(api) {
   ], 'client');
   api.addFiles([
     'fview-rwdsimplemenu.jade',
-    'fview-rwdsimplemenu.coffee'
+    'fview-rwdsimplemenu.coffee',
+    'private_classes/hamburger.coffee',
+    'private_classes/main_menu.coffee',
+    'private_classes/top_menu.coffee',
+    'private_classes/side_menu.coffee',
   ], 'client');
 });

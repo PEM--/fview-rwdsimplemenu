@@ -1,174 +1,10 @@
-Template.RwdSimpleMenuMainMenu.created = ->
-  console.log 'RwdSimpleMenuMainMenu created', @
-
-PrivateMenu = null
-
-FView.ready ->
-  class PrivateMainMenu extends famous.core.View
-    @DEFAULT_OPTIONS:
-      labelWidth: 100
-      labelSpacing: 20
-      underlineBorderRadius: 4
-      underlineBgColor: CSSC.darkgray
-    constructor: (@options) ->
-      super @options
-      @placeHolder = PrivateMenu._getAndCheckPlaceholder 'RwdSimpleMenuMainMenu'
-
-
-  class PrivateSideMenu extends famous.core.View
-    @DEFAULT_OPTIONS:
-      sideMenuZindex: 150
-      sideMenuWidth: 200
-      sideMenuBgColor: CSSC.darkgray
-      sideMenuColor: CSSC.silver
-      sideMenuSelBgColor: CSSC.gray
-      sideMenuSelColor: CSSC.white
-      transition: curve: 'easeInOut', duration: 300
-    constructor: (@options) ->
-      super @options
-      @placeHolder = PrivateMenu._getAndCheckPlaceholder 'RwdSimpleMenuSideMenu'
-
-  # Private class defining the menu
-  class PrivateMenu extends famous.core.View
-    @DEFAULT_OPTIONS:
-      menuHeight: 50
-      transition: curve: 'easeInOut', duration: 300
-    constructor: (@options) ->
-      super @options
-      console.log @options
-
-      @isSideMenuActive = false
-      @isSideMenuActiveDeps = new Tracker.Dependency
-      @mainMenu = new PrivateMainMenu
-      @sideMenu = new PrivateSideMenu
-      Template.RwdSimpleMenuMainMenu.rendered = =>
-        #@fview = FView.byId 'sideMenu'
-        RwdSimpleMenuMainHomeButton = FView.byId 'RwdSimpleMenuMainHomeButton'
-        RwdSimpleMenuMainHomeButton.surface.on 'click', =>
-          @setMenuItem()
-          Router.go '/'
-        hackyColorTrans = "background-color #{@options.transition.duration}ms, \
-          color #{@options.transition.duration}ms"
-        css.add ['.rwd-simple-menu-main-home-button', '.menulabel'],
-          lineHeight: CSSC.px @options.menuHeight
-          cursor: 'pointer'
-          textAlign: 'center'
-        .add '.sideMenu', backgroundColor: @options.sideMenuBgColor
-        .add '.menuUnderline',
-          backgroundColor: @options.underlineBgColor
-          borderRadius: CSSC.px @options.underlineBorderRadius
-        .add '.menuitem',
-          textAlign: 'center'
-          lineHeight: CSSC.px @options.menuHeight
-          cursor: 'pointer'
-          backgroundColor: @options.sideMenuBgColor
-          color: @options.sideMenuColor
-          webkitTransition: hackyColorTrans
-          mozTransition: hackyColorTrans
-          oTransition: hackyColorTrans
-          transition: hackyColorTrans
-        .add '.menuitem.active',
-          backgroundColor: @options.sideMenuSelBgColor
-          color: @options.sideMenuSelColor
-      Template.RwdSimpleMenuMainMenu.helpers
-        buttonSize: => "[#{@options.menuHeight},#{@options.menuHeight}]"
-      ###
-      Template.menuHamburger.rendered = =>
-        menuHamburger = FView.byId 'menuHamburger'
-        menuHamburger.surface.on 'click', => @toggle()
-      Template.menuHamburger.helpers
-        buttonSize: => "[#{@options.menuHeight},#{@options.menuHeight}]"
-      Template.menuTop.rendered = =>
-        @menuUnderline = (FView.byId 'menuUnderline').modifier
-      Template.menuTopItem.rendered = ->
-        surf = (FView.byId @data.rt).surface
-        surf.on 'click', => Router.go "/#{@data.rt}"
-      ###
-      @items = []
-      ###
-      Template.menuTop.helpers
-        items: => @items
-        spacing: => @options.labelSpacing
-        underLineSize: =>
-          "[#{@options.labelWidth}, #{@options.underlineBorderRadius}]"
-        itemSize: =>
-          "[#{@options.labelWidth}, #{@options.menuHeight}]"
-      Template.sideMenu.helpers
-        side: => "[#{@options.sideMenuWidth}, #{rwindow.innerHeight()}]"
-        translate: =>
-          "[-#{@options.sideMenuWidth}, 0, #{@options.sideMenuZindex}]"
-      Template.innerSideMenu.helpers
-        items: => _.extend {act:'menuitem inactive'}, item for item in @items
-        side: => "[#{@options.sideMenuWidth}, #{rwindow.innerHeight()}]"
-        itemSize: => "[#{@options.sideMenuWidth}, #{@options.menuHeight}]"
-      Template.menuTopItem.rendered = ->
-        surf = (FView.byId @data.rt).surface
-        surf.on 'click', =>
-          mainMenu.setMenuItem @data.rt
-          Router.go "/#{@data.rt}"
-      Template.sideMenuItem.rendered = ->
-        surf = (FView.byId @data.rt).surface
-        surf.on 'click', =>
-          mainMenu.setMenuItem @data.rt
-          Router.go "/#{@data.rt}"
-          mainMenu.deactivate()
-      @depend()
-      ###
-    # Static functions used by aggreagated classes
-    @_getAndCheckPlaceholder: (placeHolderName) ->
-      fview = FView.byId placeHolderName
-      if fview is undefined
-        FView.log.error "Please create a placeholder #{placeHolderName}"
-        throw new Error "No placeholder for #{placeHolderName}"
-      placeHolder = fview.modifier
-      if placeHolder is undefined
-        FView.log.error "Placeholder #{placeHolderName} isn't a StateModifier"
-        throw new Error "#{placeHolderName} isn't a StateModifier"
-      placeHolder
-    addRoute: (route, icon, label) ->
-      @items.push {rt: route, ic: icon, lbl: label}
-    removeRoute: (route) ->
-      found = _.indexOf @items, (_.find @items, (item) -> item.rt is route)
-      unless found is -1
-        @items.splice found, 1
-    depend: =>
-      Tracker.autorun =>
-        @isSideMenuActiveDeps.depend()
-        posx = if @isSideMenuActive then 0 else -@options.sideMenuWidth
-        @fview?.modifier.setTransform (famous.core.Transform.translate posx, \
-          0, @options.sideMenuZindex), @options.transition
-    activate: ->
-      if @isSideMenuActive is false
-        @isSideMenuActive = true
-        @isSideMenuActiveDeps.changed()
-    deactivate: ->
-      if @isSideMenuActive is true
-        @isSideMenuActive = false
-        @isSideMenuActiveDeps.changed()
-    toggle: ->
-      @isSideMenuActive = not @isSideMenuActive
-      @isSideMenuActiveDeps.changed()
-    setMenuItem: (route) ->
-      found = _.indexOf @items, (_.find @items, (item) -> item.rt is route)
-      if rwindow.screen 'lte', 'xsmall'
-        for item, idx in @items
-          surf = (FView.byId "#{item.rt}").surface
-          if found is idx
-            surf.addClass 'active'
-          else
-            surf.removeClass 'active'
-      else
-        if found is -1
-          @menuUnderline.setOpacity 0, @options.transition
-        else
-          @menuUnderline.setOpacity 1, @options.transition
-          posX = (@items.length-found-1)*@options.labelWidth + \
-            (@items.length-found-1)*@options.labelSpacing
-          @menuUnderline.setTransform (famous.core.Transform.translate -posX,\
-            0, 0), @options.transition
-
 # Exposed class as a Singleton
 class @RwdSimpleMenu
+  @_class:
+    MainMenu: null
+    TopMenu: null
+    SideMenu: null
+    Hamburger: null
   _inst = null
   _isViewPortReady = false
   _watchdog = null
@@ -209,7 +45,7 @@ class @RwdSimpleMenu
       return
   @_run: (callback) ->
     if _inst  is null
-      _inst = new PrivateMenu _options
+      _inst = new RwdSimpleMenu._class.MainMenu _options
     else
       _inst.setOptions _options
     callback _inst
