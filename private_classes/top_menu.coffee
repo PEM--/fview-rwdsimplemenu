@@ -91,6 +91,8 @@ FView.ready ->
           method:'spring', period: 300, dampingRatio: .5, velocity: 0.05
         Router.go '/'
     # Create a placeholder for menu items.
+    # Depending on the viewport size this placeholder displays
+    #  either a hamburger menu (a 2 state menu) or a sequence of labels.
     _createMenuItems: ->
       seqMod = new famous.modifiers.StateModifier
         align: [1,0]

@@ -55,3 +55,5 @@ FView.ready ->
       @_modOff.halt()
       @_modOn.setOpacity (Number @status), @options.transition
       @_modOff.setOpacity (Number not @status), @options.transition
+    # Size of the hamburger is fixed at instantiation
+    getSize: -> [@options.hamburgerSize, @options.hamburgerSize]
