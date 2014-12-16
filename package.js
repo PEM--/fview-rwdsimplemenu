@@ -19,7 +19,7 @@ Package.onUse(function(api) {
     'tracker',
     'underscore',
     'iron:router@1.0.3',
-    'gadicohen:famous-views@0.1.29',
+    'gadicohen:famous-views@0.1.30',
     'gadicohen:reactive-window@1.0.1',
     'fortawesome:fontawesome@4.2.0_2',
     'pierreeric:cssc@1.0.3',
