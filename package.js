@@ -22,14 +22,12 @@ Package.onUse(function(api) {
     'gadicohen:famous-views@0.1.29',
     'gadicohen:reactive-window@1.0.1',
     'fortawesome:fontawesome@4.2.0_2',
-    'mquandalle:jade@0.3.0',
     'pierreeric:cssc@1.0.3',
     'pierreeric:cssc-normalize@1.0.1',
     'pierreeric:cssc-famous@1.0.2',
     'pierreeric:cssc-colors@1.0.3'
   ], 'client');
   api.addFiles([
-    'fview-rwdsimplemenu.jade',
     'fview-rwdsimplemenu.coffee',
     'private_classes/hamburger.coffee',
     'private_classes/main_menu.coffee',

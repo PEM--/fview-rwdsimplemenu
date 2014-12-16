@@ -12,16 +12,19 @@ FView.ready ->
       @_optionsManager.patch RwdSimpleMenu._class.SideMenu.DEFAULT_OPTIONS
       @_optionsManager.patch RwdSimpleMenu._class.Hamburger.DEFAULT_OPTIONS
       @_optionsManager.patch options
+      # A data array that contains all labels declared by the user.
+      @_items = []
       # Instantiate aggregated classes with the merged options
-      @mainMenu = new RwdSimpleMenu._class.TopMenu @options
-      @sideMenu = new RwdSimpleMenu._class.SideMenu @options
+      @_mainMenu = new RwdSimpleMenu._class.TopMenu @options
+      @_sideMenu = new RwdSimpleMenu._class.SideMenu @options
       # Subscribe and pipe events
-      @_eventInput.subscribe @mainMenu
-      @_eventInput.subscribe @sideMenu
-      @_eventOutput.pipe @mainMenu
-      @_eventOutput.pipe @sideMenu
+      @_eventInput.subscribe @_mainMenu
+      @_eventInput.subscribe @_sideMenu
+      @_eventOutput.pipe @_mainMenu
+      @_eventOutput.pipe @_sideMenu
+      # When receiving an 'sidemenutoggled' event from the top menu
+      #  sends it to the sidemenu.
       @_eventInput.on 'sidemenutoggled', =>
-        console.log 'Main menu triggers sidemenutoggled'
         @_eventOutput.trigger 'sidemenutoggled'
 
 
@@ -73,10 +76,9 @@ FView.ready ->
         surf = (FView.byId @data.rt).surface
         surf.on 'click', => Router.go "/#{@data.rt}"
       ###
-      @items = []
       ###
       Template.menuTop.helpers
-        items: => @items
+        items: => @_items
         spacing: => @options.labelSpacing
         underLineSize: =>
           "[#{@options.labelWidth}, #{@options.underlineBorderRadius}]"
@@ -87,7 +89,7 @@ FView.ready ->
         translate: =>
           "[-#{@options.sideMenuWidth}, 0, #{@options.sideMenuZindex}]"
       Template.innerSideMenu.helpers
-        items: => _.extend {act:'menuitem inactive'}, item for item in @items
+        items: => _.extend {act:'menuitem inactive'}, item for item in @_items
         side: => "[#{@options.sideMenuWidth}, #{rwindow.innerHeight()}]"
         itemSize: => "[#{@options.sideMenuWidth}, #{@options.menuHeight}]"
       Template.menuTopItem.rendered = ->
@@ -104,11 +106,11 @@ FView.ready ->
       @depend()
       ###
     addRoute: (route, icon, label) ->
-      @items.push {rt: route, ic: icon, lbl: label}
+      @_items.push {rt: route, ic: icon, lbl: label}
     removeRoute: (route) ->
-      found = _.indexOf @items, (_.find @items, (item) -> item.rt is route)
+      found = _.indexOf @_items, (_.find @_items, (item) -> item.rt is route)
       unless found is -1
-        @items.splice found, 1
+        @_items.splice found, 1
     depend: =>
       Tracker.autorun =>
         @isSideMenuActiveDeps.depend()
@@ -127,9 +129,9 @@ FView.ready ->
       @isSideMenuActive = not @isSideMenuActive
       @isSideMenuActiveDeps.changed()
     setMenuItem: (route) ->
-      found = _.indexOf @items, (_.find @items, (item) -> item.rt is route)
+      found = _.indexOf @_items, (_.find @_items, (item) -> item.rt is route)
       if rwindow.screen 'lte', 'xsmall'
-        for item, idx in @items
+        for item, idx in @_items
           surf = (FView.byId "#{item.rt}").surface
           if found is idx
             surf.addClass 'active'
@@ -140,8 +142,8 @@ FView.ready ->
           @menuUnderline.setOpacity 0, @options.transition
         else
           @menuUnderline.setOpacity 1, @options.transition
-          posX = (@items.length-found-1)*@options.labelWidth + \
-            (@items.length-found-1)*@options.labelSpacing
+          posX = (@_items.length-found-1)*@options.labelWidth + \
+            (@_items.length-found-1)*@options.labelSpacing
           @menuUnderline.setTransform (famous.core.Transform.translate -posX,\
             0, 0), @options.transition
     # Static functions used by aggreagated classes
