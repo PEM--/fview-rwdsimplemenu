@@ -37,6 +37,11 @@ FView.ready ->
         align: [0,0]
         origin: [1,0]
         size: [@options.sideMenuWidth, rwindow.innerHeight()]
+      # Resize event relies on reactivity instead of basic events.
+      # Reactivity is debounce in the package reactive-window.
+      Tracker.autorun =>
+        # TODO Set a minimum size depending on number of items.
+        @_mainMod.setSize [@options.sideMenuWidth, rwindow.innerHeight()]
       #@_mainMod.setTransform famous.core.Transform.translate \
       #    @options.sideMenuWidth, 0, @options.sideMenuZindex
       # Create a background surface
@@ -56,6 +61,7 @@ FView.ready ->
 
       # Menu items is a sequence of labelled entries
       seqLabel = new famous.core.ViewSequence
+      seqMenuItems.sequenceFrom seqLabel
 
     # Toggle display of the side menu
     _toggle: ->

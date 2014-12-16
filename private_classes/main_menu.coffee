@@ -29,8 +29,8 @@ FView.ready ->
 
 
 
-      @isSideMenuActive = false
-      @isSideMenuActiveDeps = new Tracker.Dependency
+      #@isSideMenuActive = false
+      #@isSideMenuActiveDeps = new Tracker.Dependency
       ###
       Template.RwdSimpleMenuMainMenu.rendered = =>
         #@fview = FView.byId 'sideMenu'
@@ -111,6 +111,7 @@ FView.ready ->
       found = _.indexOf @_items, (_.find @_items, (item) -> item.rt is route)
       unless found is -1
         @_items.splice found, 1
+    ###
     depend: =>
       Tracker.autorun =>
         @isSideMenuActiveDeps.depend()
@@ -128,6 +129,7 @@ FView.ready ->
     toggle: ->
       @isSideMenuActive = not @isSideMenuActive
       @isSideMenuActiveDeps.changed()
+    ###
     setMenuItem: (route) ->
       found = _.indexOf @_items, (_.find @_items, (item) -> item.rt is route)
       if rwindow.screen 'lte', 'xsmall'
