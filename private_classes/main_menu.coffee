@@ -15,6 +15,16 @@ FView.ready ->
       # Instantiate aggregated classes with the merged options
       @mainMenu = new RwdSimpleMenu._class.TopMenu @options
       @sideMenu = new RwdSimpleMenu._class.SideMenu @options
+      # Subscribe and pipe events
+      @_eventInput.subscribe @mainMenu
+      @_eventInput.subscribe @sideMenu
+      @_eventOutput.pipe @mainMenu
+      @_eventOutput.pipe @sideMenu
+      @_eventInput.on 'sidemenutoggled', =>
+        console.log 'Main menu triggers sidemenutoggled'
+        @_eventOutput.trigger 'sidemenutoggled'
+
+
 
       @isSideMenuActive = false
       @isSideMenuActiveDeps = new Tracker.Dependency
@@ -93,23 +103,6 @@ FView.ready ->
           mainMenu.deactivate()
       @depend()
       ###
-    # Static functions used by aggreagated classes
-    @_getPlaceholder: (placeHolderName) ->
-      fview = FView.byId placeHolderName
-      if fview is undefined
-        FView.log.error "Please create a placeholder #{placeHolderName}"
-        throw new Error "No placeholder for #{placeHolderName}"
-      placeHolder = fview.modifier
-      if placeHolder is undefined
-        FView.log.error "Placeholder #{placeHolderName} isn't a StateModifier"
-        throw new Error "#{placeHolderName} isn't a StateModifier"
-      fview
-    @_getHtmlFromTemplate: (tplName) ->
-      tpl = Template[tplName]
-      if tpl is undefined
-        FView.log.error "Please set template #{tplName}"
-        throw new Error "No #{tplName} defined"
-      Blaze.toHTML tpl
     addRoute: (route, icon, label) ->
       @items.push {rt: route, ic: icon, lbl: label}
     removeRoute: (route) ->
@@ -151,3 +144,25 @@ FView.ready ->
             (@items.length-found-1)*@options.labelSpacing
           @menuUnderline.setTransform (famous.core.Transform.translate -posX,\
             0, 0), @options.transition
+    # Static functions used by aggreagated classes
+    # --------------------------------------------
+    # Get an FView from the user's templates and throw an
+    # explicit error if the template cannot be found.
+    @_getPlaceholder: (placeHolderName) ->
+      fview = FView.byId placeHolderName
+      if fview is undefined
+        FView.log.error "Please create a placeholder #{placeHolderName}"
+        throw new Error "No placeholder for #{placeHolderName}"
+      placeHolder = fview.modifier
+      if placeHolder is undefined
+        FView.log.error "Placeholder #{placeHolderName} isn't a StateModifier"
+        throw new Error "#{placeHolderName} isn't a StateModifier"
+      fview
+    # Parse as static HTML a template defined by the user and throw an
+    # explicit error if the template cannot be found.
+    @_getHtmlFromTemplate: (tplName) ->
+      tpl = Template[tplName]
+      if tpl is undefined
+        FView.log.error "Please set template #{tplName}"
+        throw new Error "No #{tplName} defined"
+      Blaze.toHTML tpl

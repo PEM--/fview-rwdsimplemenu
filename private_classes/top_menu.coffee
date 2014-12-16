@@ -22,7 +22,7 @@ FView.ready ->
     constructor: (@options) ->
       # Call parent class View's constructor with bypassed options
       super @options
-      # Get and check if main menu placeholder is available
+      # Get and check if top menu placeholder is available
       @_placeHolder = MainMenu._getPlaceholder 'RwdSimpleMenuMainMenu'
       # Add current component to the placeholder
       @_placeHolder.node.add @
@@ -87,22 +87,36 @@ FView.ready ->
       # The button is animated to demonstrate that the user has clicked on it.
       homeButtonSurf.on 'click', ->
         homeButtonMod.halt()
-        homeButtonMod.setTransform (famous.core.Transform.translate 0,0),
+        homeButtonMod.setTransform (famous.core.Transform.translate 0,0,0),
           method:'spring', period: 300, dampingRatio: .5, velocity: 0.05
         Router.go '/'
     # Create a placeholder for menu items.
     # Depending on the viewport size this placeholder displays
     #  either a hamburger menu (a 2 state menu) or a sequence of labels.
     _createMenuItems: ->
+      # The sequence modifier is aligned to the upper right corner
+      # of the screen with a maximized sized for the screen.
       seqMod = new famous.modifiers.StateModifier
         align: [1,0]
         origin: [1,0]
         opacity: 1
+      # Create an empty sequence at first.
       seqView = new famous.views.SequentialLayout
         itemSpacing: @options.labelSpacing
         direction: famous.utilities.Utility.Direction.X
+      # Add the empty sequence to the component
       (@_menuNode.add seqMod).add seqView
-      @_hamburgerSeq = [new Hamburger @options]
+      # Create a view sequence for the hamburger
+      @_hamburgerSeq = new famous.core.ViewSequence
+      # Create an hamburger button, subscribe to its events and push
+      #  it in its dedicated sequence
+      hamburger = new Hamburger @options
+      @_eventInput.subscribe hamburger
+      @_hamburgerSeq.push hamburger
+      @_eventInput.on 'toggled', => @_eventOutput.emit 'sidemenutoggled'
+
+
+
       @_menuSeq = []
       Tracker.autorun =>
         isSmall = rwindow.screen 'lte', @options.minWidth
