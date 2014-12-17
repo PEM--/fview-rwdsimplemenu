@@ -33,6 +33,7 @@ FView.ready ->
       # Handle routing event from inner menus
       @_eventInput.on 'routing', (evt) =>
         console.log 'Routing', evt
+        @_eventOutput.trigger 'sidemenutoggled'
 
 
       #@isSideMenuActive = false

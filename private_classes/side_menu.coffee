@@ -95,9 +95,7 @@ FView.ready ->
       # Ensure events bubbling.
       surf.pipe @
       # Emit a routing event on click.
-      surf.on 'click', =>
-        @_eventOutput.emit 'routing', route: route
-        @_toggle()
+      surf.on 'click', => @_eventOutput.emit 'routing', route: route
     # Remove a route from the menu items
     remove: (route) ->
       # Find the requested route

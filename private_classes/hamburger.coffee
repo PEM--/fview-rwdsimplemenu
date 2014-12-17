@@ -17,11 +17,6 @@ FView.ready ->
       # Set opacity depending on current state.
       @_modOn.setOpacity Number @status
       @_modOff.setOpacity Number not @status
-      # When the component is clicked, it toggles its state and emit
-      #  a event 'toggled' that can be intercepted by its parent containers.
-      @_eventInput.on 'click', =>
-        @_toggle()
-        @_eventOutput.emit 'toggled'
     # Create a modifier and a surface from a Spacebar template.
     _createModSurf: (name) ->
       # Create a modifier which will set the size of its child surface.
@@ -42,6 +37,9 @@ FView.ready ->
       @_css.add '.rwd-simple-menu-hamburger', cursor: 'pointer'
       # Ensure events bubbling.
       surf.pipe @
+      # When the component is clicked, it toggles its state and emit
+      #  a event 'toggled' that can be intercepted by its parent containers.
+      surf.on 'click', => @_eventOutput.emit 'toggled'
       # Add this modifier and its surface to the component content.
       (@add mod).add surf
       # Return the current modifier for further use in this component.

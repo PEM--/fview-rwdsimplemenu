@@ -114,6 +114,7 @@ FView.ready ->
       @_eventInput.subscribe hamburger
       @_hamburgerSeq.push hamburger
       @_eventInput.on 'toggled', => @_eventOutput.emit 'sidemenutoggled'
+      @_eventInput.on 'sidemenutoggled', -> hamburger._toggle()
 
 
 
