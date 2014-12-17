@@ -85,11 +85,11 @@ FView.ready ->
       ((@_menuNode.add homeButtonMod).add animMod).add homeButtonSurf
       # On click event, the router is called to go back on the home page.
       # The button is animated to demonstrate that the user has clicked on it.
-      homeButtonSurf.on 'click', ->
+      homeButtonSurf.on 'click', =>
         homeButtonMod.halt()
         homeButtonMod.setTransform (famous.core.Transform.translate 0,0,0),
           method:'spring', period: 300, dampingRatio: .5, velocity: 0.05
-        Router.go '/'
+        @_eventOutput.emit 'routing', route: '/'
     # Create a placeholder for menu items.
     # Depending on the viewport size this placeholder displays
     #  either a hamburger menu (a 2 state menu) or a sequence of labels.

@@ -27,6 +27,7 @@ FView.ready ->
       @_eventInput.subscribe @
       # On 'sidemenutoggled' from parent toggles the side menu in or out
       @_eventInput.on 'sidemenutoggled', => @_toggle()
+      @_eventInput.on 'routing', (evt) => @_setRoute evt.route
       # Create the menu items
       @_createMenuItems()
     # Create the main modifier that contains the slide menu
@@ -64,15 +65,27 @@ FView.ready ->
       @_menuItemTpl = RwdSimpleMenu._class.MainMenu._getTemplate \
         'RwdSimpleMenuSideMenuLabel'
       # Style the labels and ensure a proper hand cursor
+      # FIXME This should be done with Famo.us
+      hackyColorTrans = "background-color #{@options.transition.duration}ms, \
+        color #{@options.transition.duration}ms"
       @_css.add '.rwd-simple-menu-side-menu-label',
         backgroundColor: @options.sideMenuBgColor
         color: @options.sideMenuColor
         textAlign: 'center'
         lineHeight: CSSC.px @options.sideMenuLabelHeight
+        # FIXME This should be done with Famo.us
+        webkitTransition: hackyColorTrans
+        mozTransition: hackyColorTrans
+        oTransition: hackyColorTrans
+        transition: hackyColorTrans
         cursor: 'pointer'
-      @_css.add '.rwd-simple-menu-side-menu-label .active',
-        backgroundColor: @options.sideMenuBgColor
-        color: @options.sideMenuColor
+      @_css.add '.rwd-simple-menu-side-menu-label.active',
+        backgroundColor: @options.sideMenuSelBgColor
+        color: @options.sideMenuSelColor
+        webkitTransition: hackyColorTrans
+        mozTransition: hackyColorTrans
+        oTransition: hackyColorTrans
+        transition: hackyColorTrans
     # Add a route into the menu items
     addRoute: (route, data) ->
       # Menu items are created within a render node to handle
@@ -119,5 +132,17 @@ FView.ready ->
       translate = if @_isMenuHidden then 0 else @options.sideMenuWidth
       @_mainMod.setTransform (famous.core.Transform.translate \
         translate, 0, @options.sideMenuZindex), @options.transition
+    # Set selected menu item
+    _setRoute: (route) ->
+      # Find the requested route
+      seq = @_seqLabel
+      found = null
+      until seq is null
+        node = seq.get()
+        surf = node._child._child._object
+        surf.removeClass 'active'
+        found = surf if node.route is route
+        seq = seq.getNext()
+      found.addClass 'active' unless found is null
     # Size of the side menu
     getSize: -> [@options.sideMenuWidth, rwindow.innerHeight()]
