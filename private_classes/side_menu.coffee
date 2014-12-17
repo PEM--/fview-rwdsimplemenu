@@ -6,6 +6,7 @@ FView.ready ->
     @DEFAULT_OPTIONS:
       sideMenuZindex: 150
       sideMenuWidth: 200
+      sideMenuLabelHeight: 50
       sideMenuBgColor: CSSC.darkgray
       sideMenuColor: CSSC.silver
       sideMenuSelBgColor: CSSC.gray
@@ -28,7 +29,6 @@ FView.ready ->
       @_eventInput.on 'sidemenutoggled', => @_toggle()
       # Create the menu items
       @_createMenuItems()
-
     # Create the main modifier that contains the slide menu
     # and its bakground surface
     _createMainModAndBg: ->
@@ -36,14 +36,13 @@ FView.ready ->
       @_mainMod = new famous.modifiers.StateModifier
         align: [0,0]
         origin: [1,0]
+        opacity: 0
         size: [@options.sideMenuWidth, rwindow.innerHeight()]
+      @_mainMod.setOpacity 1, @options.transition
       # Resize event relies on reactivity instead of basic events.
       # Reactivity is debounce in the package reactive-window.
       Tracker.autorun =>
-        # TODO Set a minimum size depending on number of items.
         @_mainMod.setSize [@options.sideMenuWidth, rwindow.innerHeight()]
-      #@_mainMod.setTransform famous.core.Transform.translate \
-      #    @options.sideMenuWidth, 0, @options.sideMenuZindex
       # Create a background surface
       surf = new famous.core.Surface
         properties: backgroundColor: @options.sideMenuBgColor
@@ -54,15 +53,65 @@ FView.ready ->
     # Create menu items
     _createMenuItems: ->
       # Create a sequence layout that displays all menu labels.
-      seqMenuItems = new famous.views.SequentialLayout
-        direction: famous.utilities.Utility.Y
+      @_seqMenuItems = new famous.views.SequentialLayout
+        direction: famous.utilities.Utility.Direction.Y
         itemSpacing: 0
-      @_mainNode.add seqMenuItems
-
+      @_mainNode.add @_seqMenuItems
       # Menu items is a sequence of labelled entries
-      seqLabel = new famous.core.ViewSequence
-      seqMenuItems.sequenceFrom seqLabel
-
+      @_seqLabel = new famous.core.ViewSequence
+      @_seqMenuItems.sequenceFrom @_seqLabel
+      # Get menu items template
+      @_menuItemTpl = RwdSimpleMenu._class.MainMenu._getTemplate \
+        'RwdSimpleMenuSideMenuLabel'
+      # Style the labels and ensure a proper hand cursor
+      @_css.add '.rwd-simple-menu-side-menu-label',
+        backgroundColor: @options.sideMenuBgColor
+        color: @options.sideMenuColor
+        textAlign: 'center'
+        lineHeight: CSSC.px @options.sideMenuLabelHeight
+        cursor: 'pointer'
+      @_css.add '.rwd-simple-menu-side-menu-label .active',
+        backgroundColor: @options.sideMenuBgColor
+        color: @options.sideMenuColor
+    # Add a route into the menu items
+    addRoute: (route, data) ->
+      # Menu items are created within a render node to handle
+      # animation through a StateModifier
+      node = new famous.core.RenderNode
+      # Add a route member to the render node for easy retrivieng it
+      node.route = route
+      mod = new famous.modifiers.StateModifier
+        align: [.5,0]
+        origin: [.5,0]
+        size: [@options.sideMenuWidth, @options.sideMenuLabelHeight]
+        opacity: 0
+      surf = new famous.core.Surface
+        classes: ['rwd-simple-menu-side-menu-label']
+        content: Blaze.toHTMLWithData @_menuItemTpl, data
+      (node.add mod).add surf
+      @_seqLabel.push node
+      # Adding is performed with a little opacity animation
+      mod.setOpacity 1, @options.transition
+      # Ensure events bubbling.
+      surf.pipe @
+      # Emit a routing event on click.
+      surf.on 'click', =>
+        @_eventOutput.emit 'routing', route: route
+        @_toggle()
+    # Remove a route from the menu items
+    remove: (route) ->
+      # Find the requested route
+      seq = @_seqLabel
+      while seq.get().route isnt route
+        seq = seq.getNext()
+      # Get the modifier of animating the removal
+      mod = seq.get()._child._object
+      # Start by setting to 0
+      mod.setOpacity 0, @options.transition
+      # And at the same moment, resize the content to 0
+      mod.setSize [0, 0], @options.transition, =>
+        # When the size is set to 0, remove the menu item
+        @_seqLabel.splice seq.index, 0
     # Toggle display of the side menu
     _toggle: ->
       @_isMenuHidden = not @_isMenuHidden
@@ -72,13 +121,5 @@ FView.ready ->
       translate = if @_isMenuHidden then 0 else @options.sideMenuWidth
       @_mainMod.setTransform (famous.core.Transform.translate \
         translate, 0, @options.sideMenuZindex), @options.transition
-
-
-
-
-
-
-
-
     # Size of the side menu
     getSize: -> [@options.sideMenuWidth, rwindow.innerHeight()]

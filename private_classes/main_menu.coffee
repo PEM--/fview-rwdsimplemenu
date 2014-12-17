@@ -1,4 +1,7 @@
 FView.ready ->
+  # Shortcuts
+  TopMenu = RwdSimpleMenu._class.TopMenu
+  SideMenu = RwdSimpleMenu._class.SideMenu
   # Private class defining the menu
   class RwdSimpleMenu._class.MainMenu extends famous.core.View
     @DEFAULT_OPTIONS:
@@ -14,6 +17,7 @@ FView.ready ->
       @_optionsManager.patch options
       # A data array that contains all labels declared by the user.
       @_items = []
+      @_itemsDeps = new Tracker.Dependency
       # Instantiate aggregated classes with the merged options
       @_mainMenu = new RwdSimpleMenu._class.TopMenu @options
       @_sideMenu = new RwdSimpleMenu._class.SideMenu @options
@@ -26,7 +30,9 @@ FView.ready ->
       #  sends it to the sidemenu.
       @_eventInput.on 'sidemenutoggled', =>
         @_eventOutput.trigger 'sidemenutoggled'
-
+      # Handle routing event from inner menus
+      @_eventInput.on 'routing', (evt) =>
+        console.log 'Routing', evt
 
 
       #@isSideMenuActive = false
@@ -105,12 +111,15 @@ FView.ready ->
           mainMenu.deactivate()
       @depend()
       ###
-    addRoute: (route, icon, label) ->
-      @_items.push {rt: route, ic: icon, lbl: label}
+    addRoute: (route, data) ->
+      @_sideMenu.addRoute route, data
+      #@_items.push {rt: route, ic: icon, lbl: label}
+      #@_itemsDeps.changed()
     removeRoute: (route) ->
       found = _.indexOf @_items, (_.find @_items, (item) -> item.rt is route)
       unless found is -1
         @_items.splice found, 1
+        @_itemsDeps.changed()
     ###
     depend: =>
       Tracker.autorun =>
@@ -162,11 +171,15 @@ FView.ready ->
         FView.log.error "Placeholder #{placeHolderName} isn't a StateModifier"
         throw new Error "#{placeHolderName} isn't a StateModifier"
       fview
-    # Parse as static HTML a template defined by the user and throw an
-    # explicit error if the template cannot be found.
-    @_getHtmlFromTemplate: (tplName) ->
+    # Get a template and throw an explicit error if it cannot be found.
+    @_getTemplate: (tplName) ->
       tpl = Template[tplName]
       if tpl is undefined
         FView.log.error "Please set template #{tplName}"
         throw new Error "No #{tplName} defined"
+      tpl
+    # Parse as static HTML a template defined by the user and throw an
+    # explicit error if the template cannot be found.
+    @_getHtmlFromTemplate: (tplName) ->
+      tpl = RwdSimpleMenu._class.MainMenu._getTemplate tplName
       Blaze.toHTML tpl

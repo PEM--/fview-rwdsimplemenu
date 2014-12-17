@@ -19,7 +19,7 @@ FView.ready ->
       underlineBorderRadius: 4
       underlineBgColor: CSSC.darkgray
     # Constructor accepts non mandatory options
-    constructor: (@options) ->
+    constructor: (@options, @_items, @_itemsDeps) ->
       # Call parent class View's constructor with bypassed options
       super @options
       # Get and check if top menu placeholder is available
