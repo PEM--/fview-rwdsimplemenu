@@ -41,7 +41,7 @@ FView.ready ->
         @_sideMenu.selectMenuItem evt.route
         @_topMenu.selectMenuItem evt.route
         # Activate the routing
-        #Router.go evt.route
+        Router.go evt.route
     addRoute: (route, data) ->
       @_sideMenu.addRoute route, data
       @_topMenu.addRoute route, data
