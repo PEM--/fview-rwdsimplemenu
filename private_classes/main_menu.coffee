@@ -32,7 +32,6 @@ FView.ready ->
         @_eventOutput.trigger 'sidemenutoggled'
       # Handle routing event from inner menus
       @_eventInput.on 'routing', (evt) =>
-        console.log 'Routing', evt
         # Toggle back the side menu when routing has been activated and
         #  when the screen display the side menu (in xsmall width).
         if rwindow.screen 'lte', @options.minWidth
