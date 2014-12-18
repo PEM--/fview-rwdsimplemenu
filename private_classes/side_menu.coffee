@@ -37,18 +37,27 @@ FView.ready ->
       @_mainMod = new famous.modifiers.StateModifier
         align: [0,0]
         origin: [1,0]
-        opacity: 0
+        opacity: 1
         size: [@options.sideMenuWidth, rwindow.innerHeight()]
-      @_mainMod.setOpacity 1, @options.transition
-      # Resize event relies on reactivity instead of basic events.
-      # Reactivity is debounce in the package reactive-window.
-      Tracker.autorun =>
-        @_mainMod.setSize [@options.sideMenuWidth, rwindow.innerHeight()]
       # Create a background surface
       surf = new famous.core.Surface
         properties: backgroundColor: @options.sideMenuBgColor
       node = @_placeHolder.node.add @_mainMod
       node.add surf
+      # Resize event relies on reactivity instead of basic events.
+      # Reactivity is debounce in the package reactive-window.
+      Tracker.autorun =>
+        # Trigger reactivity both on width (for menu toggling) and
+        #  height for resizing events.
+        size = [rwindow.innerWidth(), rwindow.innerHeight()]
+        # If menu is open, close it: this ensure that when going from
+        #  a side menu state to a top menu state, both menu are not
+        #  displayed at the same time.
+        unless @_isMenuHidden
+          @_toggle()
+          @_eventOutput.trigger 'sidemenutoggled'
+        # Set the size reactively
+        @_mainMod.setSize [@options.sideMenuWidth, size[1]]
       # Return the render node
       node
     # Create menu items
@@ -148,6 +157,4 @@ FView.ready ->
     getSize: -> [@options.sideMenuWidth, rwindow.innerHeight()]
     # Select the top menu item. In case a former one has been already
     #  selected, unselect it.
-    selectMenuItem: (route) ->
-      console.log 'Setting side menu route', route
-      @_setRoute route
+    selectMenuItem: (route) -> @_setRoute route
