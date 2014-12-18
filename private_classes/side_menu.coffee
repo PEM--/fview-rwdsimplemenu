@@ -80,6 +80,7 @@ FView.ready ->
         transition: hackyColorTrans
         cursor: 'pointer'
       @_css.add '.rwd-simple-menu-side-menu-label.active',
+        fontWeight: 'boldest'
         backgroundColor: @options.sideMenuSelBgColor
         color: @options.sideMenuSelColor
         webkitTransition: hackyColorTrans
@@ -110,7 +111,7 @@ FView.ready ->
       # Emit a routing event on click.
       surf.on 'click', => @_eventOutput.emit 'routing', route: route
     # Remove a route from the menu items
-    remove: (route) ->
+    removeRoute: (route) ->
       # Find the requested route
       seq = @_seqLabel
       while seq.get().route isnt route

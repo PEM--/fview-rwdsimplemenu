@@ -96,16 +96,15 @@ FView.ready ->
     _createMenuItems: ->
       # The sequence modifier is aligned to the upper right corner
       # of the screen with a maximized sized for the screen.
-      seqMod = new famous.modifiers.StateModifier
+      @_seqMod = new famous.modifiers.StateModifier
         align: [1,0]
         origin: [1,0]
-        opacity: 1
       # Create an empty sequence at first.
-      seqView = new famous.views.SequentialLayout
+      @_seqView = new famous.views.SequentialLayout
         itemSpacing: @options.labelSpacing
         direction: famous.utilities.Utility.Direction.X
       # Add the empty sequence to the component
-      (@_menuNode.add seqMod).add seqView
+      (@_menuNode.add @_seqMod).add @_seqView
       # Create a view sequence for the hamburger
       @_hamburgerSeq = new famous.core.ViewSequence
       # Create an hamburger button, subscribe to its events and push
@@ -115,14 +114,54 @@ FView.ready ->
       @_hamburgerSeq.push hamburger
       @_eventInput.on 'toggled', => @_eventOutput.emit 'sidemenutoggled'
       @_eventInput.on 'sidemenutoggled', -> hamburger._toggle()
-
-
-
-      @_menuSeq = []
+      # Create a view sequence for the menu items
+      @_seqLabel = new famous.core.ViewSequence
+      # Get menu items template
+      @_menuItemTpl = RwdSimpleMenu._class.MainMenu._getTemplate \
+        'RwdSimpleMenuTopMenuLabel'
+      # Handle resize of viewport's width with reactivity as it is debounced
       Tracker.autorun =>
+        # If screen is too small, use the hamburger menu
         isSmall = rwindow.screen 'lte', @options.minWidth
-        #currSeq = if isSmall then @_hamburgerSeq else @_menuSeq
-        currSeq = @_hamburgerSeq
-        seqMod.setOpacity 0, @options.transition, =>
-          seqView.sequenceFrom currSeq
-          seqMod.setOpacity 1, @options.transition
+        currSeq = if isSmall then @_hamburgerSeq else @_seqLabel
+        @_seqView.sequenceFrom currSeq
+    # Add a route into the menu items
+    addRoute: (route, data) ->
+      # Menu items are created within a render node to handle
+      # animation through a StateModifier
+      node = new famous.core.RenderNode
+      # Add a route member to the render node for easy retrivieng it
+      node.route = route
+      mod = new famous.modifiers.StateModifier
+        size: [@options.labelWidth, @options.sideMenuLabelHeight]
+        opacity: 0
+      surf = new famous.core.Surface
+        classes: ['rwd-simple-menu-top-menu-label']
+        content: Blaze.toHTMLWithData @_menuItemTpl, data
+      (node.add mod).add surf
+      @_seqLabel.push node
+      # Style the menu labels
+      @_css.add '.rwd-simple-menu-top-menu-label',
+        cursor: 'default'
+        lineHeight: CSSC.px @options.menuHeight
+        textAlign: 'center'
+      # Adding is performed with a little opacity animation
+      mod.setOpacity 1, @options.transition
+      # Ensure events bubbling.
+      surf.pipe @
+      # Emit a routing event on click.
+      surf.on 'click', => @_eventOutput.emit 'routing', route: route
+    # Remove a route from the menu items
+    removeRoute: (route) ->
+      # Find the requested route
+      seq = @_seqLabel
+      while seq.get().route isnt route
+        seq = seq.getNext()
+      # Get the modifier of animating the removal
+      mod = seq.get()._child._object
+      # Start by setting to 0
+      mod.setOpacity 0, @options.transition
+      # And at the same moment, resize the content to 0
+      mod.setSize [0, 0], @options.transition, =>
+        # When the size is set to 0, remove the menu item
+        @_seqLabel.splice seq.index, 0

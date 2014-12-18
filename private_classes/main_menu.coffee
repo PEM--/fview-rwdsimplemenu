@@ -19,12 +19,12 @@ FView.ready ->
       @_items = []
       @_itemsDeps = new Tracker.Dependency
       # Instantiate aggregated classes with the merged options
-      @_mainMenu = new RwdSimpleMenu._class.TopMenu @options
+      @_topMenu = new RwdSimpleMenu._class.TopMenu @options
       @_sideMenu = new RwdSimpleMenu._class.SideMenu @options
       # Subscribe and pipe events
-      @_eventInput.subscribe @_mainMenu
+      @_eventInput.subscribe @_topMenu
       @_eventInput.subscribe @_sideMenu
-      @_eventOutput.pipe @_mainMenu
+      @_eventOutput.pipe @_topMenu
       @_eventOutput.pipe @_sideMenu
       # When receiving an 'sidemenutoggled' event from the top menu
       #  sends it to the sidemenu.
@@ -114,13 +114,10 @@ FView.ready ->
       ###
     addRoute: (route, data) ->
       @_sideMenu.addRoute route, data
-      #@_items.push {rt: route, ic: icon, lbl: label}
-      #@_itemsDeps.changed()
+      @_topMenu.addRoute route, data
     removeRoute: (route) ->
-      found = _.indexOf @_items, (_.find @_items, (item) -> item.rt is route)
-      unless found is -1
-        @_items.splice found, 1
-        @_itemsDeps.changed()
+      @_sideMenu.removeRoute route
+      @_topMenu.removeRoute route
     ###
     depend: =>
       Tracker.autorun =>
