@@ -208,7 +208,6 @@ FView.ready ->
         @_sliderMod.setOpacity (Number seq isnt null), @options.transition
       # Set the appropriate position if the route has been found.
       @_sliderMod.hasNoRoute = seq is null
-      console.log '@_sliderMod.hasNoRoute', @_sliderMod.hasNoRoute
       unless seq is null
         @_sliderMod.hasNoRoute = false
         pos = (seq.index + 1 - @_seqLabelLength) * @options.labelWidth + \
