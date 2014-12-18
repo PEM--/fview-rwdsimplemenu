@@ -36,6 +36,8 @@ FView.ready ->
       @_createMenuItems()
       # Create the menu slider
       @_createMenuSlider()
+      # Set tracker on reactive size
+      @_setTracker()
     # Create an autoresize modifier that encapsulates all included components
     _createMainMod: ->
       # The menu is set in the top - middle of the screen.
@@ -48,11 +50,6 @@ FView.ready ->
           (Math.min rwindow.innerWidth()
           @options.maxWidth), @options.menuHeight
         ]
-      # Resize event relies on reactivity instead of basic events.
-      # Reactivity is debounce in the package reactive-window.
-      Tracker.autorun =>
-        curWidth = Math.min rwindow.innerWidth(), @options.maxWidth
-        @_mainMod.setSize [curWidth, @options.menuHeight]
       # Add the main modifier to the component and return its render node.
       @add @_mainMod
     # Create and insert the Home button
@@ -124,24 +121,33 @@ FView.ready ->
       # Get menu items template
       @_menuItemTpl = RwdSimpleMenu._class.MainMenu._getTemplate \
         'RwdSimpleMenuTopMenuLabel'
-      # Handle resize of viewport's width with reactivity as it is debounced
-      Tracker.autorun =>
-        # If screen is too small, use the hamburger menu
-        isSmall = rwindow.screen 'lte', @options.minWidth
-        currSeq = if isSmall then @_hamburgerSeq else @_seqLabel
-        @_seqView.sequenceFrom currSeq
     # Create the menu slider
     _createMenuSlider: ->
       @_sliderMod = new famous.modifiers.StateModifier
         align: [1,1]
         origin: [1,1]
         size: [@options.labelWidth, @options.underlineBorderRadius]
-        #TODO opacity: 0
+        opacity: 0
+      @_sliderMod.hasNoRoute = true
       slider = new famous.core.Surface
         properties:
           borderRadius: CSSC.px @options.underlineBorderRadius
           backgroundColor: @options.underlineBgColor
       (@_seqNode.add @_sliderMod).add slider
+    # Set tracker on reactive size
+    _setTracker: ->
+      Tracker.autorun =>
+        # Resize event relies on reactivity instead of basic events.
+        # Reactivity is debounce in the package reactive-window.
+        curWidth = Math.min rwindow.innerWidth(), @options.maxWidth
+        @_mainMod.setSize [curWidth, @options.menuHeight]
+        # If screen is too small, use the hamburger menu
+        isSmall = rwindow.screen 'lte', @options.minWidth
+        currSeq = if isSmall then @_hamburgerSeq else @_seqLabel
+        unless isSmall or @_sliderMod.hasNoRoute
+          @_sliderMod.setOpacity 1, @options.transition
+        @_sliderMod.setOpacity 0, @options.transition if isSmall
+        @_seqView.sequenceFrom currSeq
     # Add a route into the menu items
     addRoute: (route, data) ->
       # Menu items are created within a render node to handle
@@ -198,9 +204,12 @@ FView.ready ->
       # Set opacity only if menu is shown.
       # Note that if route is not found the opacity is set to 0.
       if rwindow.screen 'gt', @options.minWidth
-        @_sliderMod.setOpacity (Number seq isnt null), @options.transitions
+        @_sliderMod.setOpacity (Number seq isnt null), @options.transition
       # Set the appropriate position if the route has been found.
+      @_sliderMod.hasNoRoute = seq is null
+      console.log '@_sliderMod.hasNoRoute', @_sliderMod.hasNoRoute
       unless seq is null
+        @_sliderMod.hasNoRoute = false
         pos = (seq.index + 1 - @_seqLabelLength) * @options.labelWidth + \
           (seq.index + 1 - @_seqLabelLength) * @options.labelSpacing
         @_sliderMod.setTransform (famous.core.Transform.translate \
