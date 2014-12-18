@@ -180,17 +180,18 @@ FView.ready ->
     removeRoute: (route) ->
       # Find the requested route
       seq = @_seqLabel
-      seq = seq.getNext() while seq.get().route isnt route
-      # Get the modifier of animating the removal
-      mod = seq.get()._child._object
-      # Start by setting to 0
-      mod.setOpacity 0, @options.transition
-      # And at the same moment, resize the content to 0
-      mod.setSize [0, 0], @options.transition, =>
-        # When the size is set to 0, remove the menu item
-        @_seqLabel.splice seq.index, 0
-      # Decrease the sequence length
-      @_seqLabelLength--
+      seq = seq.getNext() until seq is null or seq.get().route is route
+      unless seq is null
+        # Get the modifier of animating the removal
+        mod = seq.get()._child._object
+        # Start by setting to 0
+        mod.setOpacity 0, @options.transition
+        # And at the same moment, resize the content to 0
+        mod.setSize [0, 0], @options.transition, =>
+          # When the size is set to 0, remove the menu item
+          @_seqLabel.splice seq.index, 0
+        # Decrease the sequence length
+        @_seqLabelLength--
     # Size of the top menu.
     getSize: -> @_mainMod.getSize()
     # Select the top menu item. In case a former one has been already
@@ -198,7 +199,7 @@ FView.ready ->
     selectMenuItem: (route) ->
       # Find the requested route
       seq = @_seqLabel
-      seq = seq.getNext() until (seq is null) or (seq.get().route is route)
+      seq = seq.getNext() until seq is null or seq.get().route is route
       # Stop any previous transitions.
       @_sliderMod.halt()
       # Set opacity only if menu is shown.

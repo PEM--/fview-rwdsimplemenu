@@ -123,15 +123,16 @@ FView.ready ->
     removeRoute: (route) ->
       # Find the requested route
       seq = @_seqLabel
-      seq = seq.getNext() while seq.get().route isnt route
-      # Get the modifier of animating the removal
-      mod = seq.get()._child._object
-      # Start by setting to 0
-      mod.setOpacity 0, @options.transition
-      # And at the same moment, resize the content to 0
-      mod.setSize [0, 0], @options.transition, =>
-        # When the size is set to 0, remove the menu item
-        @_seqLabel.splice seq.index, 0
+      seq = seq.getNext() until seq is null or seq.get().route is route
+      unless seq is null
+        # Get the modifier of animating the removal
+        mod = seq.get()._child._object
+        # Start by setting to 0
+        mod.setOpacity 0, @options.transition
+        # And at the same moment, resize the content to 0
+        mod.setSize [0, 0], @options.transition, =>
+          # When the size is set to 0, remove the menu item
+          @_seqLabel.splice seq.index, 0
     # Toggle display of the side menu
     _toggle: ->
       @_isMenuHidden = not @_isMenuHidden
