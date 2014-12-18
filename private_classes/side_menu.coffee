@@ -98,32 +98,36 @@ FView.ready ->
         transition: hackyColorTrans
     # Add a route into the menu items
     addRoute: (route, data) ->
-      # Menu items are created within a render node to handle
-      # animation through a StateModifier
-      node = new famous.core.RenderNode
-      # Add a route member to the render node for easy retrivieng it
-      node.route = route
-      mod = new famous.modifiers.StateModifier
-        align: [.5,0]
-        origin: [.5,0]
-        size: [@options.sideMenuWidth, @options.sideMenuLabelHeight]
-        opacity: 0
-      surf = new famous.core.Surface
-        classes: ['rwd-simple-menu-side-menu-label']
-        content: Blaze.toHTMLWithData @_menuItemTpl, data
-      (node.add mod).add surf
-      @_seqLabel.push node
-      # Adding is performed with a little opacity animation
-      mod.setOpacity 1, @options.transition
-      # Ensure events bubbling.
-      surf.pipe @
-      # Emit a routing event on click.
-      surf.on 'click', => @_eventOutput.emit 'routing', route: route
+      # Check if the route already exists
+      seq = @_seqLabel
+      seq = seq.getNext() until seq is null or seq.get()?.route is route
+      if seq is null
+        # Menu items are created within a render node to handle
+        # animation through a StateModifier
+        node = new famous.core.RenderNode
+        # Add a route member to the render node for easy retrivieng it
+        node.route = route
+        mod = new famous.modifiers.StateModifier
+          align: [.5,0]
+          origin: [.5,0]
+          size: [@options.sideMenuWidth, @options.sideMenuLabelHeight]
+          opacity: 0
+        surf = new famous.core.Surface
+          classes: ['rwd-simple-menu-side-menu-label']
+          content: Blaze.toHTMLWithData @_menuItemTpl, data
+        (node.add mod).add surf
+        @_seqLabel.push node
+        # Adding is performed with a little opacity animation
+        mod.setOpacity 1, @options.transition
+        # Ensure events bubbling.
+        surf.pipe @
+        # Emit a routing event on click.
+        surf.on 'click', => @_eventOutput.emit 'routing', route: route
     # Remove a route from the menu items
     removeRoute: (route) ->
       # Find the requested route
       seq = @_seqLabel
-      seq = seq.getNext() until seq is null or seq.get().route is route
+      seq = seq.getNext() until seq is null or seq.get()?.route is route
       unless seq is null
         # Get the modifier of animating the removal
         mod = seq.get()._child._object
