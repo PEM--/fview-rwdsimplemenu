@@ -116,6 +116,8 @@ FView.ready ->
       @_eventInput.on 'sidemenutoggled', -> hamburger._toggle()
       # Create a view sequence for the menu items
       @_seqLabel = new famous.core.ViewSequence
+      # Set the length of the view sequence for easy retrieving it
+      @_seqLabelLength = 0
       # Get menu items template
       @_menuItemTpl = RwdSimpleMenu._class.MainMenu._getTemplate \
         'RwdSimpleMenuTopMenuLabel'
@@ -127,6 +129,7 @@ FView.ready ->
         @_seqView.sequenceFrom currSeq
     # Add a route into the menu items
     addRoute: (route, data) ->
+      console.log 'Route added', route
       # Menu items are created within a render node to handle
       # animation through a StateModifier
       node = new famous.core.RenderNode
@@ -142,7 +145,7 @@ FView.ready ->
       @_seqLabel.push node
       # Style the menu labels
       @_css.add '.rwd-simple-menu-top-menu-label',
-        cursor: 'default'
+        cursor: 'pointer'
         lineHeight: CSSC.px @options.menuHeight
         textAlign: 'center'
       # Adding is performed with a little opacity animation
@@ -151,12 +154,14 @@ FView.ready ->
       surf.pipe @
       # Emit a routing event on click.
       surf.on 'click', => @_eventOutput.emit 'routing', route: route
+      # Increase the sequence length
+      @_seqLabelLength++
     # Remove a route from the menu items
     removeRoute: (route) ->
+      console.log 'Route removed', route
       # Find the requested route
       seq = @_seqLabel
-      while seq.get().route isnt route
-        seq = seq.getNext()
+      seq = seq.getNext() while seq.get().route isnt route
       # Get the modifier of animating the removal
       mod = seq.get()._child._object
       # Start by setting to 0
@@ -165,3 +170,11 @@ FView.ready ->
       mod.setSize [0, 0], @options.transition, =>
         # When the size is set to 0, remove the menu item
         @_seqLabel.splice seq.index, 0
+      # Decrease the sequence length
+      @_seqLabelLength--
+    # Size of the top menu.
+    getSize: -> @_mainMod.getSize()
+    # Select the top menu item. In case a former one has been already
+    #  selected, unselect it.
+    selectMenuItem: (route) ->
+      console.log 'TODO',

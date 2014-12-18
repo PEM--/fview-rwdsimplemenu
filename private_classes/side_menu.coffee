@@ -114,8 +114,7 @@ FView.ready ->
     removeRoute: (route) ->
       # Find the requested route
       seq = @_seqLabel
-      while seq.get().route isnt route
-        seq = seq.getNext()
+      seq = seq.getNext() while seq.get().route isnt route
       # Get the modifier of animating the removal
       mod = seq.get()._child._object
       # Start by setting to 0
@@ -147,3 +146,8 @@ FView.ready ->
       found.addClass 'active' unless found is null
     # Size of the side menu
     getSize: -> [@options.sideMenuWidth, rwindow.innerHeight()]
+    # Select the top menu item. In case a former one has been already
+    #  selected, unselect it.
+    selectMenuItem: (route) ->
+      console.log 'Setting side menu route', route
+      @_setRoute route

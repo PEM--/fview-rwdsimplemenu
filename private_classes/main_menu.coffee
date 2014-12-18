@@ -33,7 +33,16 @@ FView.ready ->
       # Handle routing event from inner menus
       @_eventInput.on 'routing', (evt) =>
         console.log 'Routing', evt
-        @_eventOutput.trigger 'sidemenutoggled' unless evt.route is '/'
+        # Toggle back the side menu when routing has been activated and
+        #  when the screen display the side menu (in xsmall width).
+        if rwindow.screen 'lte', @options.minWidth
+          @_eventOutput.trigger 'sidemenutoggled' unless evt.route is '/'
+        # Set the appropriate selected route on the top menu
+        @_sideMenu.selectMenuItem evt.route
+        @_topMenu.selectMenuItem evt.route
+        # Activate the routing
+        #Router.go evt.route
+
 
 
       #@isSideMenuActive = false
@@ -137,6 +146,7 @@ FView.ready ->
       @isSideMenuActive = not @isSideMenuActive
       @isSideMenuActiveDeps.changed()
     ###
+    ###
     setMenuItem: (route) ->
       found = _.indexOf @_items, (_.find @_items, (item) -> item.rt is route)
       if rwindow.screen 'lte', 'xsmall'
@@ -155,6 +165,7 @@ FView.ready ->
             (@_items.length-found-1)*@options.labelSpacing
           @menuUnderline.setTransform (famous.core.Transform.translate -posX,\
             0, 0), @options.transition
+    ###
     # Static functions used by aggreagated classes
     # --------------------------------------------
     # Get an FView from the user's templates and throw an
