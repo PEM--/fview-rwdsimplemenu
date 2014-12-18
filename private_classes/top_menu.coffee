@@ -34,6 +34,8 @@ FView.ready ->
       @_createHomeButton()
       # Create a placeholder for menu items.
       @_createMenuItems()
+      # Create the menu slider
+      @_createMenuSlider()
     # Create an autoresize modifier that encapsulates all included components
     _createMainMod: ->
       # The menu is set in the top - middle of the screen.
@@ -104,7 +106,8 @@ FView.ready ->
         itemSpacing: @options.labelSpacing
         direction: famous.utilities.Utility.Direction.X
       # Add the empty sequence to the component
-      (@_menuNode.add @_seqMod).add @_seqView
+      @_seqNode = @_menuNode.add @_seqMod
+      @_seqNode.add @_seqView
       # Create a view sequence for the hamburger
       @_hamburgerSeq = new famous.core.ViewSequence
       # Create an hamburger button, subscribe to its events and push
@@ -127,9 +130,20 @@ FView.ready ->
         isSmall = rwindow.screen 'lte', @options.minWidth
         currSeq = if isSmall then @_hamburgerSeq else @_seqLabel
         @_seqView.sequenceFrom currSeq
+    # Create the menu slider
+    _createMenuSlider: ->
+      @_sliderMod = new famous.modifiers.StateModifier
+        align: [1,1]
+        origin: [1,1]
+        size: [@options.labelWidth, @options.underlineBorderRadius]
+        #TODO opacity: 0
+      slider = new famous.core.Surface
+        properties:
+          borderRadius: CSSC.px @options.underlineBorderRadius
+          backgroundColor: @options.underlineBgColor
+      (@_seqNode.add @_sliderMod).add slider
     # Add a route into the menu items
     addRoute: (route, data) ->
-      console.log 'Route added', route
       # Menu items are created within a render node to handle
       # animation through a StateModifier
       node = new famous.core.RenderNode
@@ -158,7 +172,6 @@ FView.ready ->
       @_seqLabelLength++
     # Remove a route from the menu items
     removeRoute: (route) ->
-      console.log 'Route removed', route
       # Find the requested route
       seq = @_seqLabel
       seq = seq.getNext() while seq.get().route isnt route
@@ -177,4 +190,18 @@ FView.ready ->
     # Select the top menu item. In case a former one has been already
     #  selected, unselect it.
     selectMenuItem: (route) ->
-      console.log 'TODO',
+      # Find the requested route
+      seq = @_seqLabel
+      seq = seq.getNext() until (seq is null) or (seq.get().route is route)
+      # Stop any previous transitions.
+      @_sliderMod.halt()
+      # Set opacity only if menu is shown.
+      # Note that if route is not found the opacity is set to 0.
+      if rwindow.screen 'gt', @options.minWidth
+        @_sliderMod.setOpacity (Number seq isnt null), @options.transitions
+      # Set the appropriate position if the route has been found.
+      unless seq is null
+        pos = (seq.index + 1 - @_seqLabelLength) * @options.labelWidth + \
+          (seq.index + 1 - @_seqLabelLength) * @options.labelSpacing
+        @_sliderMod.setTransform (famous.core.Transform.translate \
+          pos, 0, 200), @options.transition
