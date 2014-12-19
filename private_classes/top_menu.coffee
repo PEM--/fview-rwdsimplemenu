@@ -38,6 +38,8 @@ FView.ready ->
       @_createMenuSlider()
       # Set tracker on reactive size
       @_setTracker()
+      # Last called route is null by default
+      @_lastRoute = null
     # Create an autoresize modifier that encapsulates all included components
     _createMainMod: ->
       # The menu is set in the top - middle of the screen.
@@ -180,6 +182,8 @@ FView.ready ->
         surf.on 'click', => @_eventOutput.emit 'routing', route: route
         # Increase the sequence length
         @_seqLabelLength++
+        # Set the underline properly
+        @selectMenuItem @_lastRoute unless @_lastRoute is null
     # Remove a route from the menu items
     removeRoute: (route) ->
       # Find the requested route
@@ -196,6 +200,8 @@ FView.ready ->
           @_seqLabel.splice seq.index, 0
         # Decrease the sequence length
         @_seqLabelLength--
+        # Set the underline properly
+        @selectMenuItem @_lastRoute unless @_lastRoute is null
     # Size of the top menu.
     getSize: -> @_mainMod.getSize()
     # Select the top menu item. In case a former one has been already
@@ -218,3 +224,5 @@ FView.ready ->
           (seq.index + 1 - @_seqLabelLength) * @options.labelSpacing
         @_sliderMod.setTransform (famous.core.Transform.translate \
           pos, 0, 200), @options.transition
+        # Spare the route in the history
+        @_lastRoute = route

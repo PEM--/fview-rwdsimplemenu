@@ -30,6 +30,8 @@ FView.ready ->
       @_eventInput.on 'routing', (evt) => @_setRoute evt.route
       # Create the menu items
       @_createMenuItems()
+      # Last called route is null by default
+      @_lastRoute = null
     # Create the main modifier that contains the slide menu
     # and its bakground surface
     _createMainModAndBg: ->
@@ -123,6 +125,8 @@ FView.ready ->
         surf.pipe @
         # Emit a routing event on click.
         surf.on 'click', => @_eventOutput.emit 'routing', route: route
+        # Set the underline properly
+        @_setRoute @_lastRoute unless @_lastRoute is null
     # Remove a route from the menu items
     removeRoute: (route) ->
       # Find the requested route
@@ -137,6 +141,8 @@ FView.ready ->
         mod.setSize [0, 0], @options.transition, =>
           # When the size is set to 0, remove the menu item
           @_seqLabel.splice seq.index, 0
+        # Set the underline properly
+        @_setRoute @_lastRoute unless @_lastRoute is null
     # Toggle display of the side menu
     _toggle: ->
       @_isMenuHidden = not @_isMenuHidden
@@ -157,7 +163,10 @@ FView.ready ->
         surf.removeClass 'active'
         found = surf if node.route is route
         seq = seq.getNext()
-      found.addClass 'active' unless found is null
+      unless found is null
+        found.addClass 'active'
+        # Spare the route in the history
+        @_lastRoute = route
     # Size of the side menu
     getSize: -> [@options.sideMenuWidth, rwindow.innerHeight()]
     # Select the top menu item. In case a former one has been already
