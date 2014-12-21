@@ -135,7 +135,7 @@ FView.ready ->
         properties:
           borderRadius: CSSC.px @options.underlineBorderRadius
           backgroundColor: @options.underlineBgColor
-      (@_seqNode.add @_sliderMod).add slider
+      (@_menuNode.add @_sliderMod).add slider
     # Set tracker on reactive size
     _setTracker: ->
       Tracker.autorun =>
@@ -183,7 +183,9 @@ FView.ready ->
         # Increase the sequence length
         @_seqLabelLength++
         # Set the underline properly
-        @selectMenuItem @_lastRoute unless @_lastRoute is null
+        famous.utilities.Timer.debounce ->
+          @selectMenuItem @_lastRoute unless @_lastRoute is null
+        , 64
     # Remove a route from the menu items
     removeRoute: (route) ->
       # Find the requested route
@@ -201,7 +203,9 @@ FView.ready ->
         # Decrease the sequence length
         @_seqLabelLength--
         # Set the underline properly
-        @selectMenuItem @_lastRoute unless @_lastRoute is null
+        famous.utilities.Timer.debounce ->
+          @selectMenuItem @_lastRoute unless @_lastRoute is null
+        , 64
     # Size of the top menu.
     getSize: -> @_mainMod.getSize()
     # Select the top menu item. In case a former one has been already
