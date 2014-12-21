@@ -37,13 +37,18 @@ FView.ready ->
         if rwindow.screen 'lte', @options.minWidth
           @_eventOutput.trigger 'sidemenutoggled' unless evt.route is '/'
         # Set the appropriate selected route on the top menu
-        @_sideMenu.selectMenuItem evt.route
-        @_topMenu.selectMenuItem evt.route
+        @setRoute evt.route
         # Activate the routing
         Router.go evt.route
+    # Set current route as active
+    setRoute: (route) ->
+      @_sideMenu.selectMenuItem route
+      @_topMenu.selectMenuItem route
+    # Add a route to the top menu and the side menu.
     addRoute: (route, data) ->
       @_sideMenu.addRoute route, data
       @_topMenu.addRoute route, data
+    # Remove a route to the top menu and the side menu.
     removeRoute: (route) ->
       @_sideMenu.removeRoute route
       @_topMenu.removeRoute route
